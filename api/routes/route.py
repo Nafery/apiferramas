@@ -1,36 +1,36 @@
 from flask import Blueprint, request, jsonify
 from api.services.product_service import ProductService
 from api.services.user_service import UserService
-from api.services.currency_service import CurrencyService  # Asegúrate de tener este importado
+from api.services.currency_service import CurrencyService
 from datetime import datetime
+from api.services.webpay_service import WebpayService
 
 def register_routes(app, mysql):
+    # Define blueprint
     api_bp = Blueprint('api', __name__)
+    
+    # Instanciar servicios
     product_service = ProductService(mysql)
     user_service = UserService(mysql)
     currency_service = CurrencyService()
+    webpay_service = WebpayService()
 
+    # Rutas
     @api_bp.route('/products', methods=['GET'])
     def get_products():
-        products = product_service.get_all_products()
-        return jsonify(products)
+        return jsonify(product_service.get_all_products())
     
     @api_bp.route('/users', methods=['GET'])
     def get_users():
-        users = user_service.get_all_users()
-        return jsonify(users)
-    
+        return jsonify(user_service.get_all_users())
     
     @api_bp.route('/currency/usd', methods=['GET'])
     def get_dolar():
-        data = currency_service.get_dolar_actual()
-        return jsonify(data)
-
+        return jsonify(currency_service.get_dolar_actual())
 
     @api_bp.route('/currency/eur', methods=['GET'])
     def get_euro_actual():
-        result = currency_service.get_euro_actual()
-        return jsonify(result)
+        return jsonify(currency_service.get_euro_actual())
 
     @api_bp.route('/convert/clp-to-usd', methods=['GET'])
     def convert_clp_to_usd():
@@ -40,10 +40,7 @@ def register_routes(app, mysql):
             if "valor" not in dolar_info:
                 return jsonify({"error": "No se pudo obtener la tasa de cambio del dólar"}), 500
             converted = round(amount / dolar_info["valor"], 2)
-            return jsonify({
-                "clp": amount,
-                "usd": converted
-            })
+            return jsonify({"clp": amount, "usd": converted})
         except Exception as e:
             return jsonify({"error": str(e)}), 400
 
@@ -55,12 +52,61 @@ def register_routes(app, mysql):
             if "valor" not in euro_info:
                 return jsonify({"error": "No se pudo obtener la tasa de cambio del euro"}), 500
             converted = round(amount / euro_info["valor"], 2)
-            return jsonify({
-                "clp": amount,
-                "eur": converted
-            })
+            return jsonify({"clp": amount, "eur": converted})
         except Exception as e:
             return jsonify({"error": str(e)}), 400
+        
+    @api_bp.route('/webpay/init', methods=['POST'])
+    def iniciar_pago():
+        data = request.get_json()
+        amount = data.get("amount", 1000)
+        session_id = data.get("session_id", "usuario_demo")
+        return_url = data.get("return_url", "http://127.0.0.1:5000/webpay/confirmar")
+        try:
+            resp = webpay_service.iniciar_transaccion(amount, session_id, return_url)
+            return jsonify({"url": resp["url"], "token": resp["token"]})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
+    @api_bp.route('/webpay/confirmar', methods=['POST'])
+    def confirmar_pago():
+        token_ws = request.form.get("token_ws")
+        try:
+            resultado = webpay_service.confirmar_transaccion(token_ws)
+            return jsonify({"status": "Pago confirmado", "detalle": resultado})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+        
+    @api_bp.route('/webpay/create', methods=['POST'])
+    def crear_transaccion_webpay():
+        data = request.get_json()
+        amount = data.get("amount")
+        session_id = data.get("session_id", "default-session")
+        return_url = "http://localhost:3000/webpay/response"
 
-    app.register_blueprint(api_bp)
+        if not amount:
+            return jsonify({"error": "El monto es obligatorio"}), 400
+
+        try:
+            response = webpay_service.iniciar_transaccion(amount, session_id, return_url)
+            return jsonify({"url": response['url'], "token": response['token']})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+        
+    @api_bp.route('/webpay/confirm', methods=['POST'])
+    def confirmar_transaccion_webpay():
+        token_ws = request.form.get("token_ws")
+        if not token_ws:
+            return jsonify({"error": "token_ws no encontrado"}), 400
+        try:
+            result = webpay_service.confirmar_transaccion(token_ws)
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    # ✅ Registro del blueprint con prefijo explícito "/"
+    app.register_blueprint(api_bp, url_prefix="/")
+
+    # Mostrar rutas registradas
+    for rule in app.url_map.iter_rules():
+        print(f"{rule.endpoint}: {rule.rule}")
