@@ -22,4 +22,4 @@ pip install -r requirements.txt
 
 ## 🛠️  Configuración de la base de datos
 ###1.- Crear una base de datos
-Abre la terminal o línea de comandos y ejecuta el siguiente comando:
+**Abre la terminal o línea de comandos y ejecuta el siguiente comando:**
