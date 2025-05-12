@@ -14,7 +14,7 @@ y pagos con Transbank para la cadena de ferreterías Ferramas.
 - Transbank SDK
 - Requests 
 
-## Estructura del proyecto
+## 📁 Estructura del proyecto
 ```plaintext
 apiferramas/
 ├── .gitignore
@@ -31,7 +31,7 @@ apiferramas/
     └── routes/
 ```
 
-## Instalación y ejecución
+## 🔧 Instalación y ejecución
 
 ```bash
 git clone https://github.com/Nafery/apiferramas
@@ -48,8 +48,10 @@ Abre la terminal o línea de comandos y ejecuta el siguiente comando:
 mysql -u root -p
 ```
 Luego dentro de tu editor de MySQL de preferencia ejecuta el siguiente código:
+```bash
 CREATE DATABASE ferramas;
 EXIT;
+```
 
 ### 2.- Importar el archivo de la base de datos ferramas.sql
 Asegurándote de tener el archivo ferramas.sql en la carpeta del repositorio, ejecuta:
@@ -66,7 +68,7 @@ app.config['MYSQL_PASSWORD'] = '' #Contraseña del usuario
 app.config['MYSQL_DB'] = 'ferramas'
 ```
 
-## Endpoints de la API
+## 🌐 Endpoints de la API
 
 ### Productos
 | Método | Ruta        | Descripción                 |
@@ -92,3 +94,75 @@ app.config['MYSQL_DB'] = 'ferramas'
 | ------ | ------------------- | ---------------------------------- |
 | POST   | `/webpay/init`      | Iniciar transacción de pago Webpay |
 | POST   | `/webpay/confirmar` | Confirmar transacción Webpay       |
+
+## 🧪 Pruebas y ejemplos
+### 📦 Requisitos
+Asegúrate de tener la API corriendo en http://localhost:5000
+### ✅ Obtener lista de productos
+En el navegador de tu preferencia busca http://localhost:5000/products.
+Al ejecutar el código anterior deberías ver un json que te retorne la información de los productos registrados (adjuntamos un fragmento).
+```json
+{
+    "categoria_id": 1,
+    "codigo_producto": "FER-001",
+    "descripcion": "Martillo para carpinter\u00eda de alta resistencia.",
+    "id": 1,
+    "marca_id": 3,
+    "modelo": "ST-1234",
+    "nombre": "Martillo de U\u00f1a 16oz",
+    "precio": "4990.00"
+}
+```
+### 🧍 Obtener lista de usuarios
+En el navegador de tu preferencia busca http://localhost:5000/users.
+Al ejecutar el código anterior deberías ver un json que te retorne la información de los usuarios registrados (adjuntamos un fragmento).
+```json
+{
+    "creado_en": "Wed, 07 May 2025 12:42:42 GMT",
+    "email": "admin@ferremas.cl",
+    "id": 1,
+    "nombre": "Admin General",
+    "password": "admin1234",
+    "rol": "admin"
+}
+```
+### 💸 Iniciar prueba de pago con Webpay
+Acá puedes ejecutar una prueba de la integración del SDK de Transbank con Postman o con curl, la prueba con cada una de estas opciones sería:
+#### Curl
+Request:
+```bash
+curl -X POST http://localhost:5000/webpay/init \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 5000, "session_id": "user123", "return_url": "http://localhost:3000/webpay/response"}'
+```
+Response:
+```json
+{
+  "url": "https://webpay.someurl.com/init",
+  "token": "abc123xyz"
+}
+```
+#### 🧪 Postman
+
+Para probar la api con Postman debemos seguir los siguientes pasos:
+
+1.- Abre Postman.
+2.- Crea un nuevo request.
+3.- Selecciona el método POST.
+4.- URL: http://localhost:5000/webpay/init
+5.- Body: Selecciona raw y JSON y pega lo siguiente
+```bash
+{
+  "amount": 5000,
+  "session_id": "usuario_demo",
+  "return_url": "http://localhost:3000/webpay/response"
+}
+```
+6.- Haz click en SEND.
+👉 Respuesta esperada:
+```json
+{
+  "url": "https://webpay.url/...",
+  "token": "XYZ123..."
+}
+```
