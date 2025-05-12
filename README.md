@@ -30,8 +30,6 @@ apiferramas/
     ├── utils/
     └── routes/
 ```
-
-## 🧱 Arquitectura en capas
 ## 🧱 Arquitectura en capas
 
 La API sigue una arquitectura en capas para mantener el código organizado, reutilizable y escalable. A continuación se describe cada capa:
