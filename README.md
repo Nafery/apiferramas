@@ -16,7 +16,6 @@ y pagos con Transbank para la cadena de ferreterías Ferramas.
 
 ## Estructura del proyecto
 apiferramas/
-│
 ├── .gitignore
 ├── app.py
 ├── credenciales.txt
@@ -24,11 +23,11 @@ apiferramas/
 ├── requirements.txt
 ├── README.md
 └── api/
-    ├── db
-    ├── models/
-    ├── services/
-    ├── utils/
-    └── routes/
+├── db/
+├── models/
+├── services/
+├── utils/
+└── routes/
 
 ## Instalación y ejecución
 
