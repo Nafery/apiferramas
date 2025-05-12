@@ -32,15 +32,18 @@ apiferramas/
 ```
 
 ## 🧱 Arquitectura en capas
+## 🧱 Arquitectura en capas
+
 La API sigue una arquitectura en capas para mantener el código organizado, reutilizable y escalable. A continuación se describe cada capa:
 
--** `routes/`**: Define las rutas de la API y maneja solicitudes HTTP. Se encarga de recibir y enviar respuestas.
--** `services/`**: Contiene la lógica de negocio y orquesta el flujo de datos entre las rutas y los modelos. Aquí se ubican las funciones principales que procesan los datos.
--** `models/`**: Encapsula la estructura de los datos y realiza consultas SQL directas a la base de datos.
--** `db/`**: Puede contener configuraciones adicionales para la conexión a la base de datos.
--** `utils/`**: Funciones auxiliares o utilitarias que pueden ser compartidas entre servicios.
+- **`routes/`**: Define las rutas de la API y maneja las solicitudes HTTP. Se encarga de recibir y enviar respuestas.
+- **`services/`**: Contiene la lógica de negocio y orquesta el flujo de datos entre las rutas y los modelos. Aquí se ubican las funciones principales que procesan los datos.
+- **`models/`**: Encapsula la estructura de los datos y realiza consultas SQL directas a la base de datos.
+- **`db/`**: Puede contener configuraciones adicionales para la conexión a la base de datos (si se usan).
+- **`utils/`**: Funciones auxiliares o utilitarias que pueden ser compartidas entre servicios.
 
 Este enfoque modular facilita el mantenimiento del proyecto y permite realizar pruebas o cambios en una capa sin afectar directamente a las demás.
+
 
 
 ## 🔧 Instalación y ejecución
