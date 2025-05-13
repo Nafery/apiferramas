@@ -1,2 +1,9 @@
 # Ignorar credenciales
 credenciales.txt
+
+# Ignorar la carpeta __pycache__
+__pycache__/
+
+# Ignorar archivos compilados de Python
+*.pyc
+*.pyo

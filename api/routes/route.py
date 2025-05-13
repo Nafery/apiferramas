@@ -1,8 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, redirect
 from api.services.product_service import ProductService
 from api.services.user_service import UserService
 from api.services.currency_service import CurrencyService
-from datetime import datetime
 from api.services.webpay_service import WebpayService
 
 def register_routes(app, mysql):
@@ -68,14 +67,28 @@ def register_routes(app, mysql):
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
-    @api_bp.route('/webpay/confirmar', methods=['POST'])
+    @api_bp.route('/webpay/confirmar', methods=['GET', 'POST'])
     def confirmar_pago():
-        token_ws = request.form.get("token_ws")
+        token_ws = request.args.get("token_ws") or request.form.get("token_ws")
+        if not token_ws:
+            # Redirige al frontend en caso de error por falta de token
+            return redirect("http://localhost:3000/webpay/error")
+
         try:
             resultado = webpay_service.confirmar_transaccion(token_ws)
-            return jsonify({"status": "Pago confirmado", "detalle": resultado})
+            status = resultado.get("status")
+            amount = resultado.get("amount")
+            buy_order = resultado.get("buy_order")
+
+            if status == "AUTHORIZED":
+                # Redirige a la web app con datos por query string
+                return redirect(f"http://localhost:3000/webpay/success?amount={amount}&orden={buy_order}")
+            else:
+                # Redirige a página de fallo de pago
+                return redirect("http://localhost:3000/webpay/failed")
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            # Redirige a error general si algo falla en el proceso
+            return redirect("http://localhost:3000/webpay/error")
         
     @api_bp.route('/webpay/create', methods=['POST'])
     def crear_transaccion_webpay():
