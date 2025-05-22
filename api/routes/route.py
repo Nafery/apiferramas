@@ -3,6 +3,7 @@ from api.services.product_service import ProductService
 from api.services.user_service import UserService
 from api.services.currency_service import CurrencyService
 from api.services.webpay_service import WebpayService
+from api.services.category_services import CategoryService
 
 def register_routes(app, mysql):
     # Define blueprint
@@ -13,11 +14,28 @@ def register_routes(app, mysql):
     user_service = UserService(mysql)
     currency_service = CurrencyService()
     webpay_service = WebpayService()
+    category_service = CategoryService(mysql)
 
     # Rutas
     @api_bp.route('/products', methods=['GET'])
     def get_products():
         return jsonify(product_service.get_all_products())
+    
+    @api_bp.route('/products/category/<int:category_id>', methods=['GET'])
+    def get_products_by_category(category_id):
+        try:
+            products = product_service.get_products_by_category(category_id)
+            return jsonify(products), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+        
+    @api_bp.route('/categories', methods=['GET'])
+    def get_categories():
+        try:
+            categories = category_service.get_all_categories()
+            return jsonify(categories), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
     
     @api_bp.route('/users', methods=['GET'])
     def get_users():

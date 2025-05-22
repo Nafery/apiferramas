@@ -1,9 +1,11 @@
 from flask import Flask
+from flask_cors import CORS
 from api.db.database import init_db
 from flask_mysqldb import MySQL
 from api.routes.route import register_routes
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 
 # Configuración para base de datos
 app.config['MYSQL_HOST'] = 'localhost'
@@ -17,4 +19,4 @@ mysql = init_db(app)
 register_routes(app, mysql)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
