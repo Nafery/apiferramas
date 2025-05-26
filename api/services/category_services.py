@@ -4,6 +4,7 @@ class CategoryService:
     def __init__(self, mysql):
         self.mysql = mysql
 
+    #Obtenemos todas las categorías desde la base de datos
     def get_all_categories(self):
         cursor = self.mysql.connection.cursor()
         cursor.execute("SELECT id, nombre FROM categoria")

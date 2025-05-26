@@ -7,6 +7,7 @@ class CurrencyService:
         self.api_url = "https://si3.bcentral.cl/SieteRestWS/SieteRestWS"  # Informativo
         self.siete = bcchapi.Siete(file=credentials_file)
 
+    #Obtenemos el precio del dolar actual
     def get_dolar_actual(self):
         try:
             codigo_dolar = "F073.TCO.PRE.Z.D"
@@ -37,7 +38,7 @@ class CurrencyService:
             return {"error": f"Error obteniendo dólar: {str(e)}"}
 
 
-
+    #Obtenemos el precio del euro actual
     def get_euro_actual(self):
         try:
             codigo_euro = "F072.CLP.EUR.N.O.D"
@@ -67,6 +68,7 @@ class CurrencyService:
         except Exception as e:
             return {"error": f"Error obteniendo euro: {str(e)}"}
 
+    #Convertimos desde CLP a USD y EUR
     def convertir_desde_clp(self, monto_clp):
         try:
             dolar_data = self.get_dolar_actual()

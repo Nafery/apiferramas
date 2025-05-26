@@ -17,10 +17,13 @@ def register_routes(app, mysql):
     category_service = CategoryService(mysql)
 
     # Rutas
+
+    # Ruta a productos
     @api_bp.route('/products', methods=['GET'])
     def get_products():
         return jsonify(product_service.get_all_products())
     
+    # Ruta a productos según su categoría
     @api_bp.route('/products/category/<int:category_id>', methods=['GET'])
     def get_products_by_category(category_id):
         try:
@@ -28,7 +31,8 @@ def register_routes(app, mysql):
             return jsonify(products), 200
         except Exception as e:
             return jsonify({"error": str(e)}), 500
-        
+    
+    # Ruta a Inicio de sesión
     @api_bp.route('/login', methods=['POST'])
     def login():
         data = request.get_json()
@@ -43,7 +47,8 @@ def register_routes(app, mysql):
             return jsonify(user)
         else:
             return jsonify({"error": "Credenciales inválidas"}), 401
-        
+
+    #Ruta a categorías    
     @api_bp.route('/categories', methods=['GET'])
     def get_categories():
         try:
@@ -52,18 +57,22 @@ def register_routes(app, mysql):
         except Exception as e:
             return jsonify({"error": str(e)}), 500
     
+    #Ruta a usuarios
     @api_bp.route('/users', methods=['GET'])
     def get_users():
         return jsonify(user_service.get_all_users())
     
+    # Ruta a precio del USD
     @api_bp.route('/currency/usd', methods=['GET'])
     def get_dolar():
         return jsonify(currency_service.get_dolar_actual())
 
+    # Ruta al precio del EUR
     @api_bp.route('/currency/eur', methods=['GET'])
     def get_euro_actual():
         return jsonify(currency_service.get_euro_actual())
 
+    # Ruta a conversión de monedas
     @api_bp.route('/currency/convert', methods=['POST'])
     def convertir_monedas():
         data = request.get_json()
@@ -73,7 +82,8 @@ def register_routes(app, mysql):
             return jsonify(conversion)
         except Exception as e:
             return jsonify({"error": str(e)}), 400
-        
+
+    # Ruta para iniciar el pago con Webpay    
     @api_bp.route('/webpay/init', methods=['POST'])
     def iniciar_pago():
         data = request.get_json()
@@ -86,6 +96,7 @@ def register_routes(app, mysql):
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
+    # Ruta para confirmar el pago con Webpay
     @api_bp.route('/webpay/confirmar', methods=['GET', 'POST'])
     def confirmar_pago():
         token_ws = request.args.get("token_ws") or request.form.get("token_ws")
