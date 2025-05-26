@@ -67,4 +67,28 @@ class CurrencyService:
         except Exception as e:
             return {"error": f"Error obteniendo euro: {str(e)}"}
 
+    def convertir_desde_clp(self, monto_clp):
+        try:
+            dolar_data = self.get_dolar_actual()
+            euro_data = self.get_euro_actual()
+
+            if "valor" not in dolar_data or "valor" not in euro_data:
+                return {"error": "No se pudieron obtener las tasas de cambio."}
+
+            valor_usd = dolar_data["valor"]
+            valor_eur = euro_data["valor"]
+
+            clp_a_usd = round(monto_clp / valor_usd, 2)
+            clp_a_eur = round(monto_clp / valor_eur, 2)
+
+            return {
+                "monto_clp": monto_clp,
+                "usd": clp_a_usd,
+                "eur": clp_a_eur,
+                "tasa_usd": valor_usd,
+                "tasa_eur": valor_eur
+            }
+
+        except Exception as e:
+            return {"error": f"Error al convertir monedas: {str(e)}"}
 

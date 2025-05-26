@@ -10,3 +10,12 @@ class UserService:
         results = cursor.fetchall()
         users = [User(id=row[0], nombre=row[1], email=row[2], password=row[3], rol=row[4], creado_en=row[5]).to_dict() for row in results]
         return users
+    
+    def get_user_by_credentials(self, email, password):
+        cursor = self.mysql.connection.cursor()
+        query = "SELECT id, nombre, email, password, rol, creado_en FROM usuario WHERE email = %s AND password = %s"
+        cursor.execute(query, (email, password))
+        row = cursor.fetchone()
+        if row:
+            return User(id=row[0], nombre=row[1], email=row[2], password=row[3], rol=row[4], creado_en=row[5]).to_dict()
+        return None

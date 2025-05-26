@@ -109,11 +109,16 @@ app.config['MYSQL_DB'] = 'ferramas'
 | POST   | `/webpay/confirmar` | Confirmar transacción Webpay       |
 
 ## 🧪 Pruebas y ejemplos
+
 ### 📦 Requisitos
+
 Asegúrate de tener la API corriendo en http://localhost:5000
+
 ### ✅ Obtener lista de productos
+
 En el navegador de tu preferencia busca http://localhost:5000/products.
 Al ejecutar el código anterior deberías ver un json que te retorne la información de los productos registrados (adjuntamos un fragmento).
+
 ```json
 {
     "categoria_id": 1,
@@ -126,9 +131,12 @@ Al ejecutar el código anterior deberías ver un json que te retorne la informac
     "precio": "4990.00"
 }
 ```
+
 ### 🧍 Obtener lista de usuarios
+
 En el navegador de tu preferencia busca http://localhost:5000/users.
 Al ejecutar el código anterior deberías ver un json que te retorne la información de los usuarios registrados (adjuntamos un fragmento).
+
 ```json
 {
     "creado_en": "Wed, 07 May 2025 12:42:42 GMT",
@@ -139,22 +147,30 @@ Al ejecutar el código anterior deberías ver un json que te retorne la informac
     "rol": "admin"
 }
 ```
+
 ### 💸 Iniciar prueba de pago con Webpay
+
 Acá puedes ejecutar una prueba de la integración del SDK de Transbank con Postman o con curl, la prueba con cada una de estas opciones sería:
+
 #### Curl
+
 Request:
+
 ```bash
 curl -X POST http://localhost:5000/webpay/init \
   -H "Content-Type: application/json" \
   -d '{"amount": 5000, "session_id": "user123", "return_url": "http://localhost:3000/webpay/response"}'
 ```
+
 Response:
+
 ```json
 {
   "url": "https://webpay.someurl.com/init",
   "token": "abc123xyz"
 }
 ```
+
 #### 🧪 Postman
 
 Para probar la api con Postman debemos seguir los siguientes pasos:

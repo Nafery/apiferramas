@@ -29,6 +29,21 @@ def register_routes(app, mysql):
         except Exception as e:
             return jsonify({"error": str(e)}), 500
         
+    @api_bp.route('/login', methods=['POST'])
+    def login():
+        data = request.get_json()
+        email = data.get("email")
+        password = data.get("password")
+        
+        if not email or not password:
+            return jsonify({"error": "Falta un campo"}), 400
+        
+        user = user_service.get_user_by_credentials(email, password)
+        if user:
+            return jsonify(user)
+        else:
+            return jsonify({"error": "Credenciales inválidas"}), 401
+        
     @api_bp.route('/categories', methods=['GET'])
     def get_categories():
         try:
@@ -49,27 +64,13 @@ def register_routes(app, mysql):
     def get_euro_actual():
         return jsonify(currency_service.get_euro_actual())
 
-    @api_bp.route('/convert/clp-to-usd', methods=['GET'])
-    def convert_clp_to_usd():
+    @api_bp.route('/currency/convert', methods=['POST'])
+    def convertir_monedas():
+        data = request.get_json()
         try:
-            amount = float(request.args.get("amount", 0))
-            dolar_info = currency_service.get_dolar_actual()
-            if "valor" not in dolar_info:
-                return jsonify({"error": "No se pudo obtener la tasa de cambio del dólar"}), 500
-            converted = round(amount / dolar_info["valor"], 2)
-            return jsonify({"clp": amount, "usd": converted})
-        except Exception as e:
-            return jsonify({"error": str(e)}), 400
-
-    @api_bp.route('/convert/clp-to-eur', methods=['GET'])
-    def convert_clp_to_eur():
-        try:
-            amount = float(request.args.get("amount", 0))
-            euro_info = currency_service.get_euro_actual()
-            if "valor" not in euro_info:
-                return jsonify({"error": "No se pudo obtener la tasa de cambio del euro"}), 500
-            converted = round(amount / euro_info["valor"], 2)
-            return jsonify({"clp": amount, "eur": converted})
+            amount = float(data.get("amount", 0))
+            conversion = currency_service.convertir_desde_clp(amount)
+            return jsonify(conversion)
         except Exception as e:
             return jsonify({"error": str(e)}), 400
         
@@ -78,7 +79,7 @@ def register_routes(app, mysql):
         data = request.get_json()
         amount = data.get("amount", 1000)
         session_id = data.get("session_id", "usuario_demo")
-        return_url = data.get("return_url", "http://127.0.0.1:5000/webpay/confirmar")
+        return_url = "http://localhost:5001/webpay/confirmar"
         try:
             resp = webpay_service.iniciar_transaccion(amount, session_id, return_url)
             return jsonify({"url": resp["url"], "token": resp["token"]})
@@ -89,9 +90,7 @@ def register_routes(app, mysql):
     def confirmar_pago():
         token_ws = request.args.get("token_ws") or request.form.get("token_ws")
         if not token_ws:
-            # Redirige al frontend en caso de error por falta de token
-            return redirect("http://localhost:3000/webpay/error")
-
+            return redirect("http://localhost:5173/webpay/error")
         try:
             resultado = webpay_service.confirmar_transaccion(token_ws)
             status = resultado.get("status")
@@ -99,41 +98,14 @@ def register_routes(app, mysql):
             buy_order = resultado.get("buy_order")
 
             if status == "AUTHORIZED":
-                # Redirige a la web app con datos por query string
-                return redirect(f"http://localhost:3000/webpay/success?amount={amount}&orden={buy_order}")
+                # 🔧 Redirige al frontend con los datos en la URL
+                return redirect(f"http://localhost:5173/webpay/confirmar?amount={amount}&orden={buy_order}&status={status}")
             else:
-                # Redirige a página de fallo de pago
-                return redirect("http://localhost:3000/webpay/failed")
+                return redirect("http://localhost:5173/webpay/failed")
         except Exception as e:
-            # Redirige a error general si algo falla en el proceso
-            return redirect("http://localhost:3000/webpay/error")
-        
-    @api_bp.route('/webpay/create', methods=['POST'])
-    def crear_transaccion_webpay():
-        data = request.get_json()
-        amount = data.get("amount")
-        session_id = data.get("session_id", "default-session")
-        return_url = "http://localhost:3000/webpay/response"
+            return redirect("http://localhost:5173/webpay/error")
 
-        if not amount:
-            return jsonify({"error": "El monto es obligatorio"}), 400
 
-        try:
-            response = webpay_service.iniciar_transaccion(amount, session_id, return_url)
-            return jsonify({"url": response['url'], "token": response['token']})
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
-        
-    @api_bp.route('/webpay/confirm', methods=['POST'])
-    def confirmar_transaccion_webpay():
-        token_ws = request.form.get("token_ws")
-        if not token_ws:
-            return jsonify({"error": "token_ws no encontrado"}), 400
-        try:
-            result = webpay_service.confirmar_transaccion(token_ws)
-            return jsonify(result)
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
 
     # ✅ Registro del blueprint con prefijo explícito "/"
     app.register_blueprint(api_bp, url_prefix="/")
